@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public  class CSUtils {
     static int clamp(int a, int min, int max){
@@ -51,7 +52,18 @@ public  class CSUtils {
               ico.setPixel(h,w,pixel);
             }
         }
-        ico.writeBMP();
+        ico.writeBMP("testout");
+   }
+   static void toIconAndWrite(ArrayList<PixelButton> pixelButtons, int width, int height){
+        Icon ico=new Icon(width,height);
+
+        for(int h=0;h<ico.getHeight();h++){
+            for(int w=0;w<ico.getWidth();w++){
+                Pixel pxl=new Pixel(pixelButtons.get(width*h+w).getBackground().getRGB());
+                ico.setPixel(h,w,pxl);
+            }
+       }
+        ico.writeBMP("bitmapOutput");
    }
    static void nativeWriteToFile(BufferedImage bufferedImage){
        try {

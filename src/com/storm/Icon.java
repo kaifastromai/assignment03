@@ -126,7 +126,7 @@ public class Icon {
     /**
      * Generates binary bitmap file representing this icon
      */
-    public void writeBMP() {
+    public void writeBMP(String filename) {
 
 
         try {
@@ -178,10 +178,10 @@ public class Icon {
                 bf.put(extrab);
 
             }
-            Files.write(Paths.get("test.bmp"),bf.array());
+            Files.write(Paths.get(filename+".bmp"),bf.array());
 
         } catch (Exception e) {
-            System.out.println("OH NO!");
+            System.out.println("Error in writing bitmap file!");
             System.out.println(e.toString());
             e.getStackTrace();
         }

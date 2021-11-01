@@ -1,14 +1,9 @@
 package com.storm;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 
 public class BitmapUI  {
@@ -16,16 +11,19 @@ public class BitmapUI  {
     Icon _icon;
     int w;
     int h;
-    static Color currentColor;
+    static Color currentColor=Color.WHITE;
     static boolean isAdvanced=false;
     static Dimension CurrentIndex;
 
     //2d arrays are annoying in Java...
     ArrayList<PixelButton> buttons;
 
+    ArrayList<PixelButton> getButtons(){
+        return buttons;
+    }
+
     BitmapUI(int width, int height){
         CurrentIndex=new Dimension(0,0);
-        currentColor=Color.BLACK;
         w=width;
         h=height;
         _icon=new Icon(w,h);
@@ -43,7 +41,7 @@ public class BitmapUI  {
                     CurrentIndex.height=px.y;
                     System.out.println("Pixel "+"("+px.x+", "+px.y+")" );
 
-                     colorSelectionCandidates(MainUI.FillRows-1,MainUI.FillCols-1);
+                     colorSelectionCandidates(MainWindow.FillRows-1,MainWindow.FillCols-1);
 
 
                 });
@@ -55,7 +53,7 @@ public class BitmapUI  {
                         CurrentIndex.width=v.x;
                         CurrentIndex.height=v.y;
                         if(v.getModel().isRollover()){
-                            setIsSelectionCandidate(MainUI.FillRows-1,MainUI.FillCols-1);
+                            setIsSelectionCandidate(MainWindow.FillRows-1,MainWindow.FillCols-1);
                         }
                     }
                 });

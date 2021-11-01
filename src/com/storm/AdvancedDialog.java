@@ -7,10 +7,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.html.ImageView;
 import java.awt.*;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -34,19 +31,53 @@ public class AdvancedDialog extends JDialog implements ActionListener, PropertyC
     File file;
 
 
-    public AdvancedDialog(Frame aFrame, String aWord){
+    public AdvancedDialog(MainWindow window, String aWord){
 
-        super(aFrame,aWord,false);
+
+        super(window,aWord,false);
+
+      window.addWindowListener(new WindowAdapter() {
+          @Override
+          public void windowOpened(WindowEvent e) {
+              super.windowOpened(e);
+              System.out.println("Window opened");
+          }
+      });
+
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                super.windowActivated(e);
+                MainWindow.FillRows=(int)xSpinner.getValue();
+                MainWindow.FillCols=(int)ySpinner.getValue();
+            }
+
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                super.windowDeactivated(e);
+                System.out.println("Advanced window closed!");
+                MainWindow.FillRows=1;
+                MainWindow.FillCols=1;
+
+            }
+
+//            @Override
+//            public void windowStateChanged(WindowEvent e) {
+//
+//                super.windowStateChanged(e);
+//                System.out.println(e.getNewState());
+//            }
+        });
         image= new CSImage(null);
-
         xSpinner=new JSpinner();
-        xSpinner.setModel(new SpinnerNumberModel(2,2,2048,1));
+        xSpinner.setModel(new SpinnerNumberModel(1,1,2048,1));
         ySpinner=new JSpinner();
         xSpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 var j=(JSpinner)e.getSource();
-                MainUI.FillRows=(int)j.getValue();
+                window.FillRows=(int)j.getValue();
 
             }
         });
@@ -54,10 +85,10 @@ public class AdvancedDialog extends JDialog implements ActionListener, PropertyC
             @Override
             public void stateChanged(ChangeEvent e) {
                 var j=(JSpinner)e.getSource();
-                MainUI.FillCols=(int)j.getValue();
+                window.FillCols=(int)j.getValue();
             }
         });
-        ySpinner.setModel(new SpinnerNumberModel(2,2,2048,1));
+        ySpinner.setModel(new SpinnerNumberModel(1,1,2048,1));
 
         tabbedPane=new JTabbedPane();
         tabbedPane.addChangeListener(new ChangeListener() {

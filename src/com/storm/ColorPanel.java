@@ -42,6 +42,7 @@ public class ColorPanel extends JDialog implements PropertyChangeListener, Actio
             jb.setBackground(currentColor);
             jb.setForeground(currentColor.brighter());
             jb.addActionListener(e -> {UpdateUIStateOnColor(((JButton)e.getSource()).getBackground());
+                notifyListeners();
             });
             jb.setUI(new SwatchButtonUI());
             jb.setPreferredSize(new Dimension(40,30));
@@ -56,6 +57,7 @@ public class ColorPanel extends JDialog implements PropertyChangeListener, Actio
             @Override
             public void actionPerformed(ActionEvent e) {
                 setCurrentColor(((JButton)e.getSource()).getBackground());
+                notifyListeners();
 
             }
         });

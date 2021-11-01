@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 
+
 public class Main {
 
 
@@ -22,14 +23,14 @@ public class Main {
 
         JFrame mainFrame = new JFrame("xPaint");
 
-//        final GetDimensionsDialog dialog=new GetDimensionsDialog(mainFrame,"Click a button");
-//        dialog.pack();
-//        dialog.setLocationRelativeTo(mainFrame);
-//      dialog.setVisible(true);
-//      var d=dialog.getDimensions();
-//        System.out.println(d);
-//
-//        MainUI mainUI=new MainUI(d.width,d.height,mainFrame);
+        final GetDimensionsDialog dialog=new GetDimensionsDialog(mainFrame,"Click a button");
+        dialog.pack();
+        dialog.setLocationRelativeTo(mainFrame);
+      dialog.setVisible(true);
+      var d=dialog.getDimensions();
+        System.out.println(d);
+
+        MainUI mainUI=new MainUI(d.width,d.height,mainFrame);
         mainFrame.setBackground(Color.DARK_GRAY);
         mainFrame.setSize(1000, 1000);
 
@@ -86,17 +87,13 @@ public class Main {
             }
         });
 
-        colorPanel.addColorConfirmListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+
         c.weighty=1.0;
         c.weightx=1.0;
         c.fill=GridBagConstraints.BOTH;
-        MainPaint mp=new MainPaint(10,10);
-        mp.setPreferredSize(new Dimension(500,500));
-       mainFrame.add(mp,c);
+        MainPaint mp=new MainPaint(2048,2048);
+        mp.setPreferredSize(new Dimension(2048,2048));
+      // mainFrame.add(mp,c);
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent) {
                 System.exit(0);
@@ -112,13 +109,41 @@ public class Main {
         c.weighty=0;
         c.weightx=0;
         c.gridy=2;
-        //mainFrame.add(slider,c);
+        JButton jb=new JButton();
+        jb.setUI(new NotUglyButtonUI());
+        jb.setPreferredSize(new Dimension(200,190));
+        jb.setBackground(Color.BLUE);
+
+        mainFrame.add(jb,c);
         mainFrame.pack();
         mainFrame.setVisible(true);
         mp.initImage(1024,1024);
         mp.setImageScale(1);
+        colorPanel.addColorConfirmListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+             mp.setColor(((ColorPanel)e.getSource()).getCurrentColor());
+            }
+        });
+        KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_H, Event.CTRL_MASK);
+// bind the keystroke to an object
 
+        mainFrame.getRootPane().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                System.out.println("Event");
+            }
 
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
 
 
     }

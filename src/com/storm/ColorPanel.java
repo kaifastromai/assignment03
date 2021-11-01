@@ -71,8 +71,6 @@ public class ColorPanel extends JDialog implements PropertyChangeListener, Actio
         swatchPreviousColor=new JButton();
         swatchCurrentColor.setBackground(currentColor);
         swatchCurrentColor.setForeground(currentColor.brighter());
-        swatchCurrentColor.setBackground(Color.BLACK);
-        swatchCurrentColor.setForeground(currentColor.brighter());
         swatchCurrentColor.setPreferredSize(new Dimension(50,40));
         swatchCurrentColor.setUI(new SwatchButtonUI());
 
@@ -89,7 +87,6 @@ public class ColorPanel extends JDialog implements PropertyChangeListener, Actio
                 hslPreview.setHue(inHue);
                 saturationSlider.setRampEnds(new CSUtils.HSB(nhsb.h,0,nhsb.b).getColor(),new CSUtils.HSB(nhsb.h,1,nhsb.b).getColor());
                 setCurrentColor(nhsb.getColor());
-              //  System.out.println(currentColor);
             }
         });
 
@@ -102,7 +99,6 @@ public class ColorPanel extends JDialog implements PropertyChangeListener, Actio
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 var c=(Color)evt.getNewValue();
-
                 var hsb=new CSUtils.HSB(c);
                 saturationSlider.setCurrentValue(hsb.s);
                 intensitySlider.setCurrentValue(hsb.b);
@@ -112,9 +108,6 @@ public class ColorPanel extends JDialog implements PropertyChangeListener, Actio
             }
         });
         hslPreview.addColorConfirmListener(e->notifyListeners());
-        //hslPreview.addActionListener(this);
-
-
         hueSlider.setPreferredSize(new Dimension(200,10));
         hueSlider.addConfirmActionListener(e->notifyListeners());
         intensitySlider=new ColorSlider(

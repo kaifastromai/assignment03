@@ -1,7 +1,9 @@
 package com.storm;
 import com.storm.math.AffineTransform2D;
 import com.storm.math.SmoothPolygon;
+import org.apache.commons.math3.geometry.euclidean.twod.PolygonsSet;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,8 +11,7 @@ import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
 
 public class PixelImage extends JPanel implements ActionListener, MouseMotionListener, MouseListener {
 
@@ -18,7 +19,7 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
     byte[] circleBrushFalloff = new byte[0xFF];
     float[] strokeFalloff = new float[0xFF];
 
-    ArrayDeque<Point2D> mousePosDeque;
+    ArrayList<Point2D> mousePosDeque;
     int width;
     int height;
     int displayX;
@@ -42,11 +43,11 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
     private Point mouseDragStartPos;
     private Point prevMousePos;
     private int brushSize = 10;
-    private double mousePixelThreshold;
+    private double mousePositionSTDThreshold=10;
 
     PixelImage(int width, int height) {
 
-        mousePosDeque = new ArrayDeque<>();
+        mousePosDeque = new ArrayList<>();
         scale = 1f;
         rotation = 0;
         translation = new Point(0, 0);
@@ -153,31 +154,6 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
     void drawBasicStroke() {
 
 
-
-
-        Point[] p=new Point[mousePosDeque.size()];
-        var g = bufferedImage.createGraphics();
-        for (int i = 0; i < p.length; i++) {
-            var pos1 = mousePosDeque.pop();
-                p[i]=new Point((int)Math.floor(pos1.getX()),((int)Math.floor(pos1.getY())));
-
-            // g.fillRect((int) Math.floor(pos.x / dx), (int) Math.floor(pos.y / dy), (int) Math.ceil(pixelsToFill / dx), (int) Math.ceil(pixelsToFill / dx));
-        }
-        g.setColor(currentBrushColor);
-        g.setStroke(new BasicStroke(1));
-        if(true) {
-            var sp = new SmoothPolygon(p, 3);
-        for (int i = 0; i < sp.points.length-1; i++) {
-            g.drawOval(sp.points[i].x,sp.points[i].y,brushSize/2,brushSize/2);
-
-            // g.fillRect((int) Math.floor(pos.x / dx), (int) Math.floor(pos.y / dy), (int) Math.ceil(pixelsToFill / dx), (int) Math.ceil(pixelsToFill / dx));
-        }}else{
-            for (int i = 0; i < p.length-1; i++) {
-                g.drawLine(p[i].x,p[i].y,p[i+1].x,p[i+1].y);
-                // g.fillRect((int) Math.floor(pos.x / dx), (int) Math.floor(pos.y / dy), (int) Math.ceil(pixelsToFill / dx), (int) Math.ceil(pixelsToFill / dx));
-            }
-        }
-
     }
 
     void drawMouse() {
@@ -196,8 +172,14 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
 
 
     }
-    void getMouseAverage(int range){
+    //If the last half elements have been too similar, then don't add anymore--the user isn't moving the mouse
+    double getMouseSTD(){
+        int range=mousePosDeque.size()-99;
 
+
+        double[] ar=mousePosDeque.stream().map(p->(p.getY()+p.getX())/2.0).mapToDouble(p->p).toArray();
+        StandardDeviation sd=new StandardDeviation();
+        return sd.evaluate(ar,range,50);
     }
 
     private void drawInsertEllipse() {
@@ -227,9 +209,9 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
 
     @Override
     protected void paintComponent(Graphics g) {
+
         var g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setBackground(Color.WHITE);
         // super.paintComponent(g);
         //    g.setColor(Color.BLUE);
         // g.drawRect(0,0,width+10,height+2);
@@ -243,13 +225,13 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
        // nat.translate(-getWidth()/2.0,-getHeight()/2.0);
        // t.setToTranslation(translation.x,translation.y);
         //nat.preConcatenate(t);
-        //nat.scale(scale, scale);
+        nat.scale(scale, scale);
         g2.setTransform(nat);
 //        g2.translate(translation.x, translation.y);
 //        g2.rotate(rotation);
         g.drawImage(bufferedImage, translation.x, translation.y, this);
         if (isMouseOver) {
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
             g.drawImage(previewImage, translation.x, translation.y, this);
         }
         g2.setTransform(at);
@@ -291,6 +273,14 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
         prevTranslation.x = translation.x;
         prevTranslation.y = translation.y;
         prevRotation=rotation;
+
+        var g=bufferedImage.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.drawImage(previewImage,0,0,this);
+
        // System.out.println("Mouse released");
 
     }
@@ -324,17 +314,27 @@ public class PixelImage extends JPanel implements ActionListener, MouseMotionLis
 
         } else {
             var inCoord=pointToLocalCoord(e.getPoint());
-            if(!mousePosDeque.isEmpty()) {
-                if (Math.abs(inCoord.getX() - mousePosDeque.peek().getX()) > mousePixelThreshold |
-                        Math.abs(inCoord.getY() - mousePosDeque.peek().getY()) > mousePixelThreshold) {
-                    mousePosDeque.add(inCoord);
-                }
-                drawStrokePreview();
-            }
+
+            //Only test once we have enough samples
+                mousePosDeque.add(inCoord);
+            drawStrokePreview();
+
         }
+
     }
 
     private void drawStrokePreview() {
+        var g = previewImage.createGraphics();
+        g.setBackground(new Color(0, 0, 0, 0));
+        g.clearRect(0, 0, width, height);
+
+       var points= mousePosDeque.toArray(new Point[0]);
+        SmoothPolygon sp=new SmoothPolygon(points,3);
+
+        g.setColor(currentBrushColor);
+        for(var p: sp.points){
+           g.fillOval(p.x,p.y,brushSize,brushSize);
+       }
 
     }
 

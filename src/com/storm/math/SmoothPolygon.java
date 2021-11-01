@@ -22,7 +22,7 @@ public class SmoothPolygon {
     List<Point> testList;
     public SmoothPolygon(Point[] pointList, int maxRecursiveDepth){
         lists=new ArrayList<>();
-       // this.maxRecursiveDepth=maxRecursiveDepth;
+       this.maxRecursiveDepth=maxRecursiveDepth;
         refPoints=pointList;
         testList=new LinkedList<>();
       points= generatePoints(pointList);
@@ -35,6 +35,10 @@ public class SmoothPolygon {
     private Point[] generatePoints(Point[] input){
       System.out.println(currentDepth);
        // int recD=2<<currentDepth;
+        if(input.length<3){
+            lists.add(input);
+            return input;
+        }
         int size=input.length;
          int k=0;
          var lpoints=new Point[(input.length-1)*2];
